@@ -130,6 +130,7 @@ public class FlutterNordicDfuPlugin implements MethodCallHandler, FlutterPlugin,
             String filePath = call.argument("filePath");
             Boolean fileInAsset = call.argument("fileInAsset");
             Boolean forceDfu = call.argument("forceDfu");
+            Boolean forceScanningForNewAddressInLegacyDfu = call.argument("forceScanningForNewAddressInLegacyDfu");
             Boolean enableUnsafeExperimentalButtonlessServiceInSecureDfu = call.argument("enableUnsafeExperimentalButtonlessServiceInSecureDfu");
             Boolean disableNotification = call.argument("disableNotification");
             Boolean keepBond = call.argument("keepBond");
@@ -164,7 +165,7 @@ public class FlutterNordicDfuPlugin implements MethodCallHandler, FlutterPlugin,
             }
 
             pendingResult = result;
-            startDfu(address, name, filePath, forceDfu, enableUnsafeExperimentalButtonlessServiceInSecureDfu, disableNotification, keepBond, packetReceiptNotificationsEnabled, restoreBond, startAsForegroundService, result, numberOfPackets, enablePRNs);
+            startDfu(address, name, filePath, forceDfu, forceScanningForNewAddressInLegacyDfu, enableUnsafeExperimentalButtonlessServiceInSecureDfu, disableNotification, keepBond, packetReceiptNotificationsEnabled, restoreBond, startAsForegroundService, result, numberOfPackets, enablePRNs);
         } else if (call.method.equals("abortDfu")) {
             if (controller != null) {
                 controller.abort();
@@ -177,12 +178,13 @@ public class FlutterNordicDfuPlugin implements MethodCallHandler, FlutterPlugin,
     /**
      * Start Dfu
      */
-    private void startDfu(String address, @Nullable String name, String filePath, Boolean forceDfu, Boolean enableUnsafeExperimentalButtonlessServiceInSecureDfu, Boolean disableNotification, Boolean keepBond, Boolean packetReceiptNotificationsEnabled, Boolean restoreBond, Boolean startAsForegroundService, Result result, Integer numberOfPackets, Boolean enablePRNs) {
+    private void startDfu(String address, @Nullable String name, String filePath, Boolean forceDfu, Boolean forceScanningForNewAddressInLegacyDfu, Boolean enableUnsafeExperimentalButtonlessServiceInSecureDfu, Boolean disableNotification, Boolean keepBond, Boolean packetReceiptNotificationsEnabled, Boolean restoreBond, Boolean startAsForegroundService, Result result, Integer numberOfPackets, Boolean enablePRNs) {
 
         DfuServiceInitiator starter = new DfuServiceInitiator(address)
                 .setZip(filePath)
                 .setKeepBond(true)
                 .setForceDfu(forceDfu == null ? false : forceDfu)
+                .setForceScanningForNewAddressInLegacyDfu(forceScanningForNewAddressInLegacyDfu == null ? false : forceScanningForNewAddressInLegacyDfu)
                 .setPacketsReceiptNotificationsEnabled(enablePRNs == null ? Build.VERSION.SDK_INT < Build.VERSION_CODES.M : enablePRNs)
                 .setPacketsReceiptNotificationsValue(numberOfPackets == null ? 0 : numberOfPackets)
                 .setPrepareDataObjectDelay(400)

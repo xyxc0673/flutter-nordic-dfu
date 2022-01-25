@@ -44,6 +44,7 @@ class AndroidSpecialParameter {
   /// By default the PRNs are disabled on devices with Android Marshmallow or newer and enabled on
   /// older ones.
   final bool? packetReceiptNotificationsEnabled;
+  final bool forceScanningForNewAddressInLegacyDfu;
 
   const AndroidSpecialParameter({
     this.disableNotification = false,
@@ -51,6 +52,7 @@ class AndroidSpecialParameter {
     this.packetReceiptNotificationsEnabled,
     this.restoreBond,
     this.startAsForegroundService = true,
+    this.forceScanningForNewAddressInLegacyDfu = false,
   });
 }
 
@@ -162,6 +164,7 @@ class FlutterNordicDfu {
       'name': name,
       'fileInAsset': fileInAsset,
       'forceDfu': forceDfu,
+      'forceScanningForNewAddressInLegacyDfu': androidSpecialParameter.forceScanningForNewAddressInLegacyDfu,
       'enablePRNs': enablePRNs,
       'numberOfPackets': numberOfPackets,
       'enableUnsafeExperimentalButtonlessServiceInSecureDfu':
