@@ -91,40 +91,42 @@ public class SwiftFlutterNordicDfuPlugin: NSObject, FlutterPlugin, DFUServiceDel
             return
         }
         
-        guard let firmware = DFUFirmware(urlToZipFile: URL(fileURLWithPath: filePath)) else {
+        do {
+            let firmware = try DFUFirmware(urlToZipFile: URL(fileURLWithPath: filePath))
+            
+            let dfuInitiator = DFUServiceInitiator(queue: nil)
+                .with(firmware: firmware);
+            dfuInitiator.delegate = self
+            dfuInitiator.progressDelegate = self
+            dfuInitiator.logger = self
+            
+            if let enableUnsafeExperimentalButtonlessServiceInSecureDfu = enableUnsafeExperimentalButtonlessServiceInSecureDfu {
+                dfuInitiator.enableUnsafeExperimentalButtonlessServiceInSecureDfu = enableUnsafeExperimentalButtonlessServiceInSecureDfu
+            }
+            
+            if let forceDfu = forceDfu {
+                dfuInitiator.forceDfu = forceDfu
+            }
+            
+            if let alternativeAdvertisingNameEnabled = alternativeAdvertisingNameEnabled {
+                dfuInitiator.alternativeAdvertisingNameEnabled = alternativeAdvertisingNameEnabled
+            }
+            
+            if let numberOfPackets = numberOfPackets, enablePRNs {
+                dfuInitiator.packetReceiptNotificationParameter = numberOfPackets
+            }
+
+            dfuInitiator.forceScanningForNewAddressInLegacyDfu = forceScanningForNewAddressInLegacyDfu
+            
+            pendingResult = result
+            deviceAddress = address
+            
+            dfuController = dfuInitiator.start(targetWithIdentifier: uuid)
+            print("dfuInitiator have start")
+        } catch {
             result(FlutterError(code: "DFU_FIRMWARE_NOT_FOUND", message: "Could not dfu zip file", details: nil))
             return
         }
-        
-        let dfuInitiator = DFUServiceInitiator(queue: nil)
-            .with(firmware: firmware);
-        dfuInitiator.delegate = self
-        dfuInitiator.progressDelegate = self
-        dfuInitiator.logger = self
-        
-        if let enableUnsafeExperimentalButtonlessServiceInSecureDfu = enableUnsafeExperimentalButtonlessServiceInSecureDfu {
-            dfuInitiator.enableUnsafeExperimentalButtonlessServiceInSecureDfu = enableUnsafeExperimentalButtonlessServiceInSecureDfu
-        }
-        
-        if let forceDfu = forceDfu {
-            dfuInitiator.forceDfu = forceDfu
-        }
-        
-        if let alternativeAdvertisingNameEnabled = alternativeAdvertisingNameEnabled {
-            dfuInitiator.alternativeAdvertisingNameEnabled = alternativeAdvertisingNameEnabled
-        }
-        
-        if let numberOfPackets = numberOfPackets, enablePRNs {
-            dfuInitiator.packetReceiptNotificationParameter = numberOfPackets
-        }
-
-        dfuInitiator.forceScanningForNewAddressInLegacyDfu = forceScanningForNewAddressInLegacyDfu
-        
-        pendingResult = result
-        deviceAddress = address
-        
-        dfuController = dfuInitiator.start(targetWithIdentifier: uuid)
-        print("dfuInitiator have start")
     }
     
     //MARK: DFUServiceDelegate
